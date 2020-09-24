@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Users" %}{% endblock title %}
+{% block description %}{% trans 'List of users with their statuses and last login date' %}{% endblock description %}
+
+{% block content %}
+<div class="container">
+    <div class="jumbotron bg-white mt-5">
+
+        <ul class="list-group users-list">
+            {% for user in users %}
+                <li data-username="{{ user.username }}" class="list-group-item justify-content-between">
+                    <a href="{% url 'core:chat' user.username %}" class="name text-muted">{{ user.username }}</a>
+                    <div>
+                        <small class="text-muted">{{ user.last_login|date:"d/m/Y" }}</small>
+                        <span class="status badge badge-default badge-pill">
+                            <a href="{% url 'core:user' user.username %}" class="text-white">
+                                {% trans "Offline" %}
+                            </a>
+                        </span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+  <script>
+    var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+    var socket = new WebSocket(protocol + '://' + window.location.host + '/ws/users/');
+    var $users_list = $('.users-list');
+    var $user;
+    var data;
+
+    socket.onopen = function open() {
+      console.log('WebSockets connection created.');
+    };
+
+    socket.onmessage = function message(event) {
+      data = JSON.parse(event.data);
+      // NOTE: We escape JavaScript to prevent XSS attacks.
+      if (Array.isArray(data)) {
+        // Set Offline for all users.
+        $users_list.find('li .status').removeClass('badge-success').find('a').text('Offline');
+      }
+      jQuery.each(data, function(username, is_logged_in) {
+        if (typeof(username) === 'number') {
+          // It's a list of online users.
+          username = is_logged_in;
+          is_logged_in = true;
+        }
+        $user = $users_list.find('li').filter(function () {
+          return $(this).data('username') === username;
+        });
+
+        $user.find('.name').text(username);
+        if (is_logged_in) {
+          $user.find('.status').addClass('badge-success').find('a').text('Online');
+        }
+        else {
+          $user.find('.status').removeClass('badge-success').find('a').text('Offline');
+        }
+      });
+    };
+
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.onopen();
+    }
+  </script>
+{% endblock script %}

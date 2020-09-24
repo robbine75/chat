@@ -1,0 +1,17 @@
+{% url 'core:user' message.user.username as user_url %}
+<li id="message-{{ message.pk }}" lang="{{ message.lang }}" class="{% if user.pk == message.user.pk %}right{% else %}left{% endif %} clearfix message {% if not message %}hidden-xs-up{% endif %}">
+    <span class="chat-img">
+        <a href="{{ user_url }}">
+            <img src="{{ message.avatar }}" width="50" height="50" alt="User Avatar" class="avatar" />
+        </a>
+    </span>
+    <div class="chat-body clearfix">
+        <div class="header">
+            <a href="{{ user_url }}" class="text-muted profile-link">
+                <strong class="username primary-font">{{ message.user.username }}</strong>
+            </a>
+            <small class="text-muted date-wrapper"><time class="date" datetime="{{ message.date }}">{{ message.date|timesince }}</time> ago</small>
+        </div>
+        <p class="text">{{ message.text }}</p>
+    </div>
+</li>

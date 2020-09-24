@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "About us" %}{% endblock title %}
+{% block description %}{% trans 'Simple chat site with a chatbot' %}{% endblock description %}
+
+{% block content %}
+    <div class="container">
+        <div class="jumbotron mt-5">
+            <h1 class="mb-4"><wbr>{% trans "About us" %}</h1>
+            <p>{% trans "Simple chat site with a chatbot." %}</p>
+            <p>{% trans "Link to the repository:" %} <a href="https://bitbucket.org/voron-raven/chat">https://bitbucket.org/voron-raven/chat</a></p>
+            <p>{% trans "Site owner:" %} <a href="https://www.linkedin.com/in/mykhailokeda/">Mykhailo Keda</a></p>
+        </div>
+    </div>
+{% endblock content %}

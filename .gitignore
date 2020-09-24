@@ -1,0 +1,13 @@
+.idea/
+node_modules/
+staticfiles/
+media/
+reports/
+
+.DS_Store
+db.sqlite3
+*.pyc
+*.pickle
+dump.rdb
+celerybeat-schedule
+celerybeat.pid

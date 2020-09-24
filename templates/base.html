@@ -1,0 +1,104 @@
+<!doctype html>
+{% load static %}
+{% load i18n %}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QMOFBUIlPIK7gAAAdxJREFUWMPll8FqFEEQhr/+K6IxqAgBEQ+LoiCKkJMH8RFE8RkEjyJ4M3mBHHwYjSdvQkAQYS+LohcTDWpQoyjioukqDzuDu8asG9nZPqSgT1PM93dVd1cV7HZLozqa7DRwBbgInAVagKrPAbwGOsByEEvu3hmLQpPdNtkHk8UO14bJ5tHomwRAUg2++R/Q7dat6p/DU2DJSCkdDOIRcGbM6X4OnCfxJee8VYCZQdCqHPc2dOZ+AqdIrNYiUh0ad5+V9AbY0/DBz+5+RNLH7Ll3irNnJD2ZALy3X6mdvRcBqyKwAFyd4PU/lFKKiHhYpyBKPELZczKTXQMulxCgpLcqBa/skoC5ggLmksm6Dd77f9mm6ptQyLKAdwUFrAtoFxTQFrBUUMC94g9R3dEsFODPD5Zj2UrVZk3CXmbPJwbKMXAYWJ9ARfwBHCXYyNFXjkl8cvw40G0Q3nX8JKkH39KSKQmZ9oXH9wbgnUS64OFfPfw3s99j2qYJjyaK043s+ZwzCP/rXGCyNeDYGKDvgTvZ8+Iwp6k/4NdHgN+vOuZWXx3ZBFaAp8AycDd7frGjWcBkB4b09d9Mtmiy/ePOzRSAu2OyepT6DLwCngXxmOCBx5jGrO1sRjO7dzr+BVtAwsorwcB8AAAAAElFTkSuQmCC" rel="icon"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'bower_components/bootstrap/dist/css/bootstrap.min.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}?v=3"/>
+  {% block css %}{% endblock css %}
+  <title>{% block title %}{% trans "Chat room" %}{% endblock title %}</title>
+  <meta name="description" content="{% block description %}{% trans 'Chat with users or chatbot' %}{% endblock description %}"/>
+</head>
+<body>
+<svg class="hidden-xl-down">
+  <defs>
+    <symbol id="chat-icon" viewBox="0 0 14 14">
+      <path d="M7,0.935c-3.866,0-7,2.463-7,5.5c0,1.438,0.703,2.749,1.854,3.729   c-0.044,0.955-0.242,2.239-0.942,2.901c1.337,0,2.706-0.88,3.518-1.514c0.796,0.248,1.663,0.384,2.57,0.384c3.866,0,7-2.463,7-5.5   S10.866,0.935,7,0.935z" fill="#006DF0"/>
+    </symbol>
+  </defs>
+</svg>
+  <nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse fixed-top">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="{% url 'core:user_list' %}">{% trans "Chat" %}</a>
+
+    <div class="collapse navbar-collapse" id="navbar">
+      <ul class="navbar-nav mr-auto">
+        {% if user.is_authenticated %}
+        {% with '/chat/chatbot' as chatbot_url %}
+        <li class="nav-item {% if request.get_full_path == chatbot_url %}active{% endif %}">
+          <a class="nav-link" href="{{ chatbot_url }}">{% trans "Chatbot" %}</a>
+        </li>
+        {% endwith %}
+        {% endif %}
+        {% if user.is_staff %}
+        {% url 'core:users_map' as users_url %}
+        <li class="nav-item {% if request.get_full_path == users_url %}active{% endif %}">
+          <a class="nav-link" href="{{ users_url }}">{% trans "Users" %}</a>
+        </li>
+        {% endif %}
+        {% url 'core:about_page' as about_url %}
+        <li class="nav-item {% if request.get_full_path == about_url %}active{% endif %}">
+          <a class="nav-link" href="{{ about_url }}">{% trans "About" %}</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav mr-right">
+        {% if user.is_authenticated %}
+        <li class="nav-item dropdown">
+          <a class="nav-link" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <svg class="icon">
+              <use xlink:href="#chat-icon" />
+            </svg>
+             {% if unread_threads %}<span class="badge badge-pill badge-danger">{{ unread_threads }}</span>{% endif %}
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+            {% for thread in threads %}
+            <a class="dropdown-item" href="{% url 'core:thread' thread.id %}">{{ thread.name }}</a>
+            {% endfor %}
+          </div>
+        </li>
+        {% url 'core:user' user.username as user_url %}
+        <li class="nav-item {% if request.get_full_path == user_url %}active{% endif %}">
+          <a class="nav-link" href="{{ user_url }}">
+            <img src="{{ user.profile.avatar.url }}" height="20" width="20" alt="avatar">
+            {{ user.username }}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'core:logout' %}">{% trans "Log out" %}</a>
+        </li>
+        {% else %}
+        {% url 'core:signup' as signup_url %}
+        <li class="nav-item {% if request.path == signup_url %}active{% endif %}">
+          <a class="nav-link" href="{{ signup_url }}">{% trans "Sign up" %}</a>
+        </li>
+        {% url 'core:login' as login_url %}
+        <li class="nav-item {% if request.path == login_url %}active{% endif %}">
+          <a class="nav-link" href="{{ login_url }}">{% trans "Log in" %}</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+
+  {% block content %}{% endblock content %}
+
+  <script type="text/javascript" src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'bower_components/tether/dist/js/tether.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'bower_components/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min.js' %}"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-74402136-5', 'auto');
+    ga('send', 'pageview');
+  </script>
+  {% block script %}{% endblock script %}
+</body>
+</html>

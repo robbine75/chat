@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block title %}{% trans "Profile" %}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <div class="jumbotron bg-white mt-5">
+        <div class="row my-2">
+            <div class="col-lg-8 push-lg-4">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a href="" data-target="#profile" data-toggle="tab" class="nav-link active">{% trans "Profile" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        {% if is_editing_allowed %}
+                            <a href="" data-target="#chats" data-toggle="tab" class="nav-link">{% trans "Chats" %}</a>
+                        {% else %}
+                            <a href="{% url 'core:chat' profile_user.username %}" class="name nav-link text-muted">{% trans "Chat" %}</a>
+                        {% endif %}
+                    </li>
+                </ul>
+                <div class="tab-content p-b-3">
+                    <div class="tab-pane active" id="profile">
+                        <h4 class="my-2">{% trans "User Profile" %}</h4>
+                        <div class="row">
+                            <div class="col-md-12 mt-3">
+                                <div class="form-group row">
+                                    <div class="col-md-4 float-left"><h6>{% trans "First name" %}</h6></div>
+                                    <div class="col-md-8 float-right">
+                                        {% if is_editing_allowed %}
+                                            <a href="#" id="first_name" class="editable" data-type="text" data-pk="first_name" data-url="{% url 'core:user' profile_user.username %}" data-placeholder="{% trans 'Enter first name' %}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}'}">{{ profile_user.first_name }}</a>
+                                        {% else %}
+                                            {{ profile_user.first_name }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-4 float-left"><h6>{% trans "Last name" %}</h6></div>
+                                    <div class="col-md-8 float-right">
+                                        {% if is_editing_allowed %}
+                                            <a href="#" id="last_name" class="editable" data-type="text" data-pk="last_name" data-url="{% url 'core:user' profile_user.username %}" data-placeholder="{% trans 'Enter last name' %}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}'}">{{ profile_user.last_name }}</a>
+                                        {% else %}
+                                            {{ profile_user.last_name }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-4 float-left"><h6>{% trans "Email" %}</h6></div>
+                                    <div class="col-md-8 float-right">
+                                        {% if is_editing_allowed %}
+                                            <a href="#" id="email" class="editable" data-type="email" data-pk="email" data-url="{% url 'core:user' profile_user.username %}" data-placeholder="{% trans 'Enter email' %}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}'}">{{ profile_user.email }}</a>
+                                        {% else %}
+                                            {{ profile_user.email }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--/row-->
+                    </div>
+                    {% if is_editing_allowed %}
+                    <div class="tab-pane" id="chats">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Chat" %}</th>
+                                    <th class="text-right">{% trans "Last message" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for thread in profile_threads %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'core:thread' thread.id %}" class="name text-muted">{{ thread.name }}</a>
+                                    </td>
+                                    <td class="text-right">
+                                        <small>{{ thread.last_message|date:"H:i d M Y" }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-4 pull-lg-8 text-center">
+                <img src="{{ profile_user.profile.avatar.url }}" class="m-x-auto img-fluid rounded-circle" alt="avatar">
+                {% if is_editing_allowed %}
+                    <h6 class="mt-2">{% trans "Upload a different photo" %}</h6>
+                    <form action="{% url 'core:user' profile_user.username %}" method="post" enctype="multipart/form-data" id="avatar-upload">
+                        {% csrf_token %}
+                            {% for field in form %}
+                                <label class="custom-file text-left" for="{{ field.auto_id }}">
+                                    {{ field|add_class:"custom-file-input" }}
+                                    <span class="custom-file-control"></span>
+                                </label>
+                            {% if field.errors %}
+                                <div class="alert alert-warning col-sm-9 offset-sm-3" role="alert">
+                                    {{ field.errors }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+  <script>
+      // Set up and initialize editable.
+      $.fn.editable.defaults.mode = 'inline';
+      $('.editable').editable();
+
+      $('#avatar-upload').change(function() {
+          $(this).submit();
+      });
+  </script>
+{% endblock script %}

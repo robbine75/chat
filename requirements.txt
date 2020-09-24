@@ -1,0 +1,15 @@
+celery==4.4.7
+channels==2.4.0
+channels-redis==3.0.1
+ChatterBot==1.1.0
+chatterbot-corpus==1.2.0
+Django==3.0.9
+django-redis==4.12.1
+django-widget-tweaks==1.4.8
+geoip2==4.0.2
+langid==1.1.6
+Pillow==7.2.0
+psycopg2-binary==2.8.5
+requests==2.24.0
+social-auth-app-django==4.0.0
+social-auth-core==3.3.3

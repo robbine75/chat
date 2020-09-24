@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Users" %}{% endblock title %}
+{% block description %}{% trans 'Map of users' %}{% endblock description %}
+
+{% block content %}
+<div style="margin-top: 56px; width: 100%; height: calc(100vh - 56px);">
+    <div id="map" style="height: 100%;"></div>
+    <script>
+      function initMap() {
+        var data = {{ users|safe }};
+        var marker;
+        var cluster_markers;
+        var titles;
+        var info;
+        var i;
+        var infowindow = new google.maps.InfoWindow();
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 2,
+          maxZoom: 7,
+          center: {lat: 28.024, lng: 40.887}
+        });
+        var markers = data.map(function(user) {
+          marker = new google.maps.Marker({
+            position: user.location,
+            label: user.username
+          });
+
+          google.maps.event.addListener(marker, 'click', (function () {
+              return function () {
+                  window.location = user.profile;
+              };
+          })(marker));
+
+          return marker;
+        });
+
+        // Add a marker clusterer to manage the markers.
+        var markerCluster = new MarkerClusterer(map, markers, {
+          imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+        });
+
+        google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
+          info = new google.maps.MVCObject;
+          info.set('position', cluster.center_);
+
+          cluster_markers = cluster.getMarkers();
+
+          titles = "";
+          for (i = 0; i < cluster_markers.length; i++) {
+            titles += "<a href='/user/" + cluster_markers[i].label + "'>" + cluster_markers[i].label + "</a>, ";
+          }
+          titles = titles.slice(0, -2);
+
+          infowindow.close();
+          infowindow.setContent(titles);
+          infowindow.open(map, info);
+        });
+      }
+    </script>
+    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_map_api_key }}&callback=initMap"></script>
+</div>
+{% endblock content %}

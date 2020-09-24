@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block title %}{% trans "Sign up" %}{% endblock title %}
+{% block description %}{% trans 'Sign up to chat with users or chatbot' %}{% endblock description %}
+
+{% block content %}
+<div class="container">
+  <div class="jumbotron mt-5">
+  <form action="{% url 'core:signup' %}" method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-warning col-sm-9 offset-sm-3" role="alert">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+    {% for field in form %}
+      <div class="form-group row">
+        <label class="col-sm-3 col-form-label" for="{{ field.auto_id }}">{{ field.label }}</label>
+        <div class="col-sm-9">
+        {{ field|add_class:"form-control" }}
+        </div>
+        {% if field.errors %}
+        <div class="alert alert-warning col-sm-9 offset-sm-3" role="alert">
+          {{ field.errors }}
+        </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary float-right">{% trans "Sign up" %}</button>
+    <p>{% trans "Already have an account?" %} <a href="{% url 'core:login' %}">{% trans "Log in!" %}</a></p>
+  </form>
+  </div>
+</div>
+{% endblock content %}
